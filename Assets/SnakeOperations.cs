@@ -1,6 +1,8 @@
 using UnityEngine;
 using UniRx;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 public static class SnakeOperations
 {
@@ -36,5 +38,15 @@ public static class SnakeOperations
             }
             return input;
         });
+    }
+
+    public static IEnumerable<T> Concat<T>(this IEnumerable<T> source, T concatValue)
+    {
+        foreach(var a in source)
+        {
+            yield return a;
+        }
+
+        yield return concatValue;
     }
 }

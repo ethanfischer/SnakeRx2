@@ -1,3 +1,5 @@
+using Assets;
+using System.Linq;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -8,6 +10,8 @@ public class Snake : MonoBehaviour
     private Transform _collisionRoot;
     [SerializeField]
     private int _ticksPerSecond = 5;
+    [SerializeField]
+    private GameObject _snakePrefab;
 
     void Start()
     {
@@ -19,6 +23,19 @@ public class Snake : MonoBehaviour
             .ValidationScan()
             .Subscribe(input => transform.localPosition += input);
 
-        _collisionRoot.OnTriggerEnterAsObservable().Subscribe(x => Debug.Log(x.name)).AddTo(this);
+        var snakeBodyGrowthStream = _collisionRoot
+            .OnTriggerEnterAsObservable()
+            .Where(trigger => trigger.gameObject.GetComponent<Apple>() != null)
+            .Select(x => Instantiate(_snakePrefab))
+            .StartWith(Instantiate(_snakePrefab))
+            .Scan(new GameObject[] { Instantiate(_snakePrefab) }, (acc, src) =>
+            {
+                return acc.Concat(src).ToArray();
+            })
+            .Publish();
+
+        snakeBodyGrowthStream.Connect();
+
+        tickStream.WithLatestFrom(snakeBodyGrowthStream, (tick, snakeBody) => snakeBody);
     }
 }
