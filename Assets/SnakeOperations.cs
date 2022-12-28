@@ -14,7 +14,6 @@ public static class SnakeOperations
             .AsUnitObservable();
     }
 
-
     public static IObservable<Vector3> SnakeInputObservable()
     {
         var w = OnKeyDownObservable(KeyCode.W).Select(_ => Vector3.up);
@@ -43,11 +42,16 @@ public static class SnakeOperations
 
     public static IEnumerable<T> Concat<T>(this IEnumerable<T> source, T concatValue)
     {
-        foreach(var a in source)
+        foreach (var a in source)
         {
             yield return a;
         }
 
         yield return concatValue;
+    }
+
+    public static IObservable<GameObject[]> DoOnNextTick<T>(IObservable<GameObject[]> segmentStream, IObservable<long> tickStream)
+    {
+        //tickStream.Skip(1).Do(a.Invoke());
     }
 }
