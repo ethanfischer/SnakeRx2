@@ -18,9 +18,9 @@ public class Snake : MonoBehaviour
         var inputStream = SnakeOperations.SnakeInputObservable().StartWith(Vector3.down);
         var tickStream = SnakeOperations.TickObservable(_ticksPerSecond);
 
-        var snakeBodyGrowthStream = Observable
-            .ReturnUnit()
-            .DelayFrame(1)
+        var snakeBodyGrowthStream = tickStream
+            .Skip(1)
+            .Take(1)
             .Select(x => Instantiate(_snakePrefab, position: _spawnPoint.position, rotation: Quaternion.identity))
             .SelectMany(headPrefab => headPrefab.OnTriggerEnterAsObservable()
                                                 .Where(trigger => trigger.gameObject.GetComponent<Apple>() != null)
@@ -40,12 +40,18 @@ public class Snake : MonoBehaviour
             {
                 var snakeBody = x.snakeBody;
                 var input = x.input;
-                snakeBody[0].transform.localPosition += input;
                 for (int i = 1; i < snakeBody.Length; i++)
                 {
                     snakeBody[i].transform.localPosition = snakeBody[i - 1].transform.localPosition;
                 }
+                snakeBody[0].transform.localPosition += input;
             })
             .AddTo(this);
+
+        snakeBodyGrowthStream
+            .Subscribe()
+            .
+
+        snakeBodyGrowthStream.Connect();
     }
 }
